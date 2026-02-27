@@ -1,0 +1,32 @@
+# Entorno virtual
+venv/
+env/
+*.pyc
+__pycache__/
+
+# Base de datos SQLite
+db.sqlite3
+db.sqlite3-journal
+
+# Variables de entorno
+.env
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build/Deploy
+staticfiles/
+*.zip
+*.tar.gz

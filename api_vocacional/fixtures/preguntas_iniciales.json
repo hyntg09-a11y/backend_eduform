@@ -1,0 +1,28 @@
+[
+  {
+    "model": "api_vocacional.categoriavocacional",
+    "pk": 1,
+    "fields": {
+      "nombre": "Tecnología e Informática",
+      "descripcion": "Áreas relacionadas con desarrollo, sistemas y tecnología",
+      "color_hex": "#3498db",
+      "orden": 1,
+      "activa": true,
+      "creado_en": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "api_vocacional.pregunta",
+    "pk": 1,
+    "fields": {
+      "texto": "¿Te gusta resolver problemas lógicos o de programación?",
+      "categoria": 1,
+      "tipo_respuesta": "boolean",
+      "opciones": [],
+      "peso_categoria": 1.0,
+      "orden": 1,
+      "activa": true,
+      "creado_en": "2024-01-01T00:00:00Z"
+    }
+  }
+]
