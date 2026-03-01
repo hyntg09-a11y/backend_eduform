@@ -21,5 +21,5 @@ def api_root(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', api_root),  # Root de la API
-    path('', include('api_vocacional.urls')),
+    path('api/', include('api_vocacional.urls')),
 ]

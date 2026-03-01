@@ -3,6 +3,7 @@ from .services import calculate_progress, get_results
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from django.db import transaction
 from django.utils import timezone
 from .models import Pregunta, EvaluacionVocacional, RespuestaEvaluacion
 from .serializers import (

@@ -1,4 +1,4 @@
-from django.test import TestCase, APITestCase
+from rest_framework.test import APITestCase
 from rest_framework import status
 from api_vocacional.models import CategoriaVocacional, Pregunta
 
@@ -15,7 +15,7 @@ class PreguntaViewSetTests(APITestCase):
     def test_list_preguntas(self):
         response = self.client.get('/api/preguntas/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data['results']), 1)
 
 class EvaluacionViewSetTests(APITestCase):
     def test_crear_evaluacion(self):

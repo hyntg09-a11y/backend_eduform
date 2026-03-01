@@ -1,20 +1,21 @@
-# Entorno virtual
+# .gitignore
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
 env/
-*.pyc
-__pycache__/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Base de datos SQLite
+# Django
 db.sqlite3
-db.sqlite3-journal
-
-# Variables de entorno
-.env
-!.env.example
-
-# Logs
 *.log
-logs/
+media/
+staticfiles/
 
 # IDE
 .vscode/
@@ -22,12 +23,13 @@ logs/
 *.swp
 *.swo
 
+# Environment
+.env
+*.env.local
+
 # OS
 .DS_Store
 Thumbs.db
 
-# Build/Deploy
-staticfiles/
-*.zip
-*.tar.gz
+# Aider
 .aider*
