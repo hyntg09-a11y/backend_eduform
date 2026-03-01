@@ -30,3 +30,4 @@ Thumbs.db
 staticfiles/
 *.zip
 *.tar.gz
+.aider*

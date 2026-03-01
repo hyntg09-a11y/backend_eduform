@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status, mixins
+from .services import calculate_progress, get_results
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -10,6 +11,7 @@ from .serializers import (
     EvaluacionResultadoSerializer,
     RespuestaCreateSerializer
 )
+
 
 
 class PreguntaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -56,15 +58,17 @@ class EvaluacionViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Crear nueva evaluación con metadata dinámica"""
-        evaluacion = EvaluacionVocacional.objects.create(
-            estado='en_progreso',
-            ip_usuario=self._get_client_ip(request),
-            user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],
-            metadata={
-                'referer': request.META.get('HTTP_REFERER'),
-                'accept_language': request.META.get('HTTP_ACCEPT_LANGUAGE'),
-            }
-        )
+        with transaction.atomic():
+            evaluacion = EvaluacionVocacional.objects.create(
+                estado='en_progreso',
+                ip_usuario=self._get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],
+                metadata={
+                    'referer': request.META.get('HTTP_REFERER'),
+                    'accept_language': request.META.get('HTTP_ACCEPT_LANGUAGE'),
+                }
+            )
+            
         serializer = self.get_serializer(evaluacion)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -82,16 +86,17 @@ class EvaluacionViewSet(viewsets.ModelViewSet):
         serializer = RespuestaCreateSerializer(data=request.data)
         if serializer.is_valid():
             # Evitar respuestas duplicadas
-            RespuestaEvaluacion.objects.filter(
-                evaluacion=evaluacion, 
-                pregunta_id=serializer.validated_data['pregunta'].id
-            ).delete()
-            
-            respuesta = RespuestaEvaluacion.objects.create(
-                evaluacion=evaluacion,
-                **serializer.validated_data
-            )
-            
+            with transaction.atomic():
+                RespuestaEvaluacion.objects.filter(
+                    evaluacion=evaluacion, 
+                    pregunta_id=serializer.validated_data['pregunta'].id
+                ).delete()
+                
+                respuesta = RespuestaEvaluacion.objects.create(
+                    evaluacion=evaluacion,
+                    **serializer.validated_data
+                )
+                
             # Actualizar estado si completó todas las preguntas
             total = Pregunta.objects.filter(activa=True).count()
             if evaluacion.respuestas.count() >= total:
@@ -99,10 +104,11 @@ class EvaluacionViewSet(viewsets.ModelViewSet):
                 evaluacion.completado_en = timezone.now()
                 evaluacion.save(update_fields=['estado', 'completado_en'])
             
+            progreso = calculate_progress(evaluacion)
             return Response(
                 {
                     'mensaje': 'respuesta_registrada',
-                    'progreso': evaluacion.progreso_porcentaje,
+                    'progreso': progreso,
                     'completada': evaluacion.estado == 'completada'
                 },
                 status=status.HTTP_201_CREATED
@@ -117,12 +123,12 @@ class EvaluacionViewSet(viewsets.ModelViewSet):
         
         if evaluacion.estado != 'completada':
             return Response(
-                {'error': 'evaluacion_no_completada', 'progreso': evaluacion.progreso_porcentaje},
+                {'error': 'evaluacion_no_completada', 'progreso': calculate_progress(evaluacion)},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        serializer = self.get_serializer(evaluacion)
-        return Response(serializer.data)
+        results = get_results(evaluacion)
+        return Response(results)
 
     @staticmethod
     def _get_client_ip(request):
