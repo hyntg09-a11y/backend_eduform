@@ -37,16 +37,7 @@ class PreguntaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         queryset = self.get_queryset()
         serializer = PreguntaSerializer(queryset, many=True)
         
-        response_data = {
-            'metadata': {
-                'total': queryset.count(),
-                'timestamp': timezone.now().isoformat(),
-                'version_api': '1.0'
-            },
-            'results': serializer.data
-        }
-        
-        return Response(response_data)
+        return Response({'metadata': {'total': queryset.count(), 'timestamp': timezone.now().isoformat(), 'version_api': '1.0'}, 'results': serializer.data})
 
 
 class EvaluacionViewSet(viewsets.ModelViewSet):
