@@ -13,7 +13,6 @@ from .serializers import (
 )
 
 
-
 class PreguntaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """ViewSet solo para listar preguntas activas (dinámico con filtros)"""
     queryset = Pregunta.objects.filter(activa=True).select_related('categoria')
@@ -35,13 +34,19 @@ class PreguntaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         """Override para añadir metadata útil al frontend"""
-        response = super().list(request, *args, **kwargs)
-        response.data['metadata'] = {
-            'total': self.get_queryset().count(),
-            'timestamp': timezone.now().isoformat(),
-            'version_api': '1.0'
+        queryset = self.get_queryset()
+        serializer = PreguntaSerializer(queryset, many=True)
+        
+        response_data = {
+            'metadata': {
+                'total': queryset.count(),
+                'timestamp': timezone.now().isoformat(),
+                'version_api': '1.0'
+            },
+            'results': serializer.data
         }
-        return response
+        
+        return Response(response_data)
 
 
 class EvaluacionViewSet(viewsets.ModelViewSet):
