@@ -95,12 +95,10 @@ class EvaluacionResultadoSerializer(serializers.ModelSerializer):
             return {'mensaje': 'Aún no hay suficientes respuestas para generar recomendaciones'}
         
         top_categoria = resultados[0]
+        nombre_categoria = top_categoria.get('nombre', 'Desconocida')
         return {
             'categoria_principal': top_categoria['categoria_id'],
-            'nombre_categoria': next(
-                (c['nombre'] for c in CategoriaVocacional.objects.filter(id=top_categoria['categoria_id']).values('nombre')),
-                'Desconocida'
-            ),
+            'nombre_categoria': nombre_categoria,
             'porcentaje_principal': top_categoria['porcentaje'],
-            'mensaje_personalizado': f"Tu perfil muestra mayor afinidad con {top_categoria.get('nombre_categoria', 'esta área')}. ¡Explora más oportunidades en este campo!"
+            'mensaje_personalizado': f"Tu perfil muestra mayor afinidad con {nombre_categoria}. ¡Explora más oportunidades en este campo!"
         }
