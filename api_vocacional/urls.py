@@ -1,11 +1,9 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import PreguntaViewSet, EvaluacionViewSet
-
-router = DefaultRouter(trailing_slash=False)  # URLs más limpias
-router.register(r'preguntas', PreguntaViewSet, basename='pregunta')
-router.register(r'evaluaciones', EvaluacionViewSet, basename='evaluacion')
+from django.urls import path
+from .views import inicio, crear_evaluacion, responder_pregunta, resultado
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', inicio, name='inicio'),
+    path('evaluaciones/', crear_evaluacion, name='crear_evaluacion'),
+    path('evaluaciones/<int:pk>/responder/', responder_pregunta, name='responder_pregunta'),
+    path('evaluaciones/<int:pk>/resultado/', resultado, name='resultado'),
 ]
