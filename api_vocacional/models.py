@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -81,6 +82,7 @@ class EvaluacionVocacional(models.Model):
     iniciado_en = models.DateTimeField(auto_now_add=True)
     completado_en = models.DateTimeField(null=True, blank=True)
     metadata = models.JSONField(default=dict, blank=True, help_text="Datos extra: navegador, resolución, etc.")
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         ordering = ['-iniciado_en']
