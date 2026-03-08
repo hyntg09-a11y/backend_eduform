@@ -104,6 +104,15 @@ def resultado(request, evaluacion_id):
 
     resultados = evaluacion.calcular_resultados()
 
+    for r in resultados:
+        carrera = Carrera.objects.filter(perfil_vocacional_id=r['categoria_id'], activa=True).first()
+        if carrera:
+            RecomendacionCarrera.objects.get_or_create(
+                evaluacion=evaluacion,
+                carrera=carrera,
+                defaults={'puntaje': r['porcentaje']}
+            )
+
     # El primero es el de mayor porcentaje (ya vienen ordenados)
     categoria_principal = resultados[0] if resultados else None
 
