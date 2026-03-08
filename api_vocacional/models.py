@@ -65,12 +65,11 @@ class Pregunta(models.Model):
         return self.opciones if isinstance(self.opciones, dict) else {str(i): val for i, val in enumerate(self.opciones)}
 
 
-class ProgramaEstatal(models.Model):
-    nombre_programa = models.CharField(max_length=200)
-    entidad_responsable = models.CharField(max_length=200)
+class Carrera(models.Model):
+    nombre = models.CharField(max_length=200, unique=True)
+    perfil_vocacional = models.ForeignKey(CategoriaVocacional, on_delete=models.PROTECT, related_name='carreras')
     descripcion = models.TextField(blank=True)
-    activo = models.BooleanField(default=True)
-    creado_en = models.DateTimeField(auto_now_add=True)
+    activa = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.nombre_programa
+        return self.nombre
