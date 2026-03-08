@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import inicio, crear_evaluacion, responder_pregunta, resultado
+from . import views
 
 urlpatterns = [
-    path('', inicio, name='inicio'),
-    path('evaluaciones/', crear_evaluacion, name='crear_evaluacion'),
-    path('evaluaciones/<int:pk>/responder/', responder_pregunta, name='responder_pregunta'),
-    path('evaluaciones/<int:pk>/resultado/', resultado, name='resultado'),
+    path('', views.inicio, name='inicio'),
+    path('evaluacion/nueva/', views.crear_evaluacion, name='crear_evaluacion'),
+    path('evaluacion/<int:evaluacion_id>/pregunta/<int:pregunta_num>/', views.responder_pregunta, name='responder_pregunta'),
+    path('evaluacion/<int:evaluacion_id>/resultado/', views.resultado, name='resultado'),
 ]
