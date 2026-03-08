@@ -108,6 +108,7 @@ class EvaluacionVocacional(models.Model):
             if cat.nombre not in resultados:
                 resultados[cat.nombre] = {
                     'categoria_id': cat.id,
+                    'nombre': cat.nombre,
                     'puntos': 0,
                     'peso_total': 0,
                     'color': cat.color_hex,
