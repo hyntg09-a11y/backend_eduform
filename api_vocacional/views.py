@@ -1,61 +1,123 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .models import Pregunta, EvaluacionVocacional, RespuestaEvaluacion
-from .services import calculate_progress, get_results
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.db import transaction
+from .models import Pregunta, EvaluacionVocacional, RespuestaEvaluacion, CategoriaVocacional
 
+
+# ─── INICIO ───────────────────────────────────────────────────────────────────
 
 def inicio(request):
-    preguntas = Pregunta.objects.filter(activa=True).order_by('orden', 'id')
-    return render(request, 'inicio.html', {'preguntas': preguntas})
+    """Página de bienvenida con estadísticas"""
+    total_preguntas = Pregunta.objects.filter(activa=True).count()
+    total_categorias = CategoriaVocacional.objects.filter(activa=True).count()
+    return render(request, 'vocacional/inicio.html', {
+        'total_preguntas': total_preguntas,
+        'total_categorias': total_categorias,
+    })
 
+
+# ─── EVALUACIÓN ───────────────────────────────────────────────────────────────
 
 def crear_evaluacion(request):
+    """Crea una nueva evaluación y redirige a la primera pregunta"""
     if request.method == 'POST':
         evaluacion = EvaluacionVocacional.objects.create(
             estado='en_progreso',
-            ip_usuario=request.META.get('REMOTE_ADDR'),
+            ip_usuario=_get_client_ip(request),
             user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],
-            metadata={
-                'referer': request.META.get('HTTP_REFERER'),
-                'accept_language': request.META.get('HTTP_ACCEPT_LANGUAGE'),
-            }
         )
-        return redirect('responder_pregunta', pk=evaluacion.id)
-    return HttpResponse("Método no permitido", status=405)
+        # Guardamos el id en sesión para recuperarlo siempre
+        request.session['evaluacion_id'] = evaluacion.id
+        return redirect('responder_pregunta', evaluacion_id=evaluacion.id, pregunta_num=1)
+
+    return redirect('inicio')
 
 
-def responder_pregunta(request, pk):
-    evaluacion = EvaluacionVocacional.objects.get(id=pk)
+def responder_pregunta(request, evaluacion_id, pregunta_num):
+    """Muestra y procesa una pregunta a la vez"""
+    evaluacion = get_object_or_404(EvaluacionVocacional, id=evaluacion_id)
+    preguntas = list(Pregunta.objects.filter(activa=True).select_related('categoria').order_by('orden', 'id'))
+    total = len(preguntas)
+
+    # Validar número de pregunta
+    if pregunta_num < 1 or pregunta_num > total:
+        return redirect('resultado', evaluacion_id=evaluacion_id)
+
+    pregunta_actual = preguntas[pregunta_num - 1]
+    progreso = round((evaluacion.respuestas.count() / total) * 100) if total > 0 else 0
+
     if request.method == 'POST':
-        pregunta_id = request.POST.get('pregunta_id')
-        valor_respuesta = request.POST.get('valor_respuesta')
-        tiempo_respuesta_ms = request.POST.get('tiempo_respuesta_ms')
+        valor = request.POST.get('respuesta')
+        if valor:
+            with transaction.atomic():
+                # Permite re-responder (elimina si ya existe)
+                RespuestaEvaluacion.objects.filter(
+                    evaluacion=evaluacion,
+                    pregunta=pregunta_actual
+                ).delete()
+                RespuestaEvaluacion.objects.create(
+                    evaluacion=evaluacion,
+                    pregunta=pregunta_actual,
+                    valor_respuesta=valor,
+                )
 
-        pregunta = Pregunta.objects.get(id=pregunta_id)
-        RespuestaEvaluacion.objects.create(
-            evaluacion=evaluacion,
-            pregunta=pregunta,
-            valor_respuesta=valor_respuesta,
-            tiempo_respuesta_ms=tiempo_respuesta_ms
-        )
+            # Si es la última pregunta → completar
+            if pregunta_num >= total:
+                evaluacion.estado = 'completada'
+                evaluacion.completado_en = timezone.now()
+                evaluacion.save(update_fields=['estado', 'completado_en'])
+                return redirect('resultado', evaluacion_id=evaluacion_id)
 
-        total = Pregunta.objects.filter(activa=True).count()
-        if evaluacion.respuestas.count() >= total:
-            evaluacion.estado = 'completada'
-            evaluacion.completado_en = timezone.now()
-            evaluacion.save(update_fields=['estado', 'completado_en'])
+            return redirect('responder_pregunta',
+                            evaluacion_id=evaluacion_id,
+                            pregunta_num=pregunta_num + 1)
 
-        progreso = calculate_progress(evaluacion)
-        return render(request, 'resultado.html', {'progreso': progreso, 'completada': evaluacion.estado == 'completada'})
+    # Respuesta previa si existe (para mostrar seleccionada)
+    respuesta_previa = RespuestaEvaluacion.objects.filter(
+        evaluacion=evaluacion, pregunta=pregunta_actual
+    ).first()
 
-    preguntas = Pregunta.objects.filter(activa=True).order_by('orden', 'id')
-    return render(request, 'responder_pregunta.html', {'evaluacion': evaluacion, 'preguntas': preguntas})
+    return render(request, 'vocacional/pregunta.html', {
+        'evaluacion': evaluacion,
+        'pregunta': pregunta_actual,
+        'pregunta_num': pregunta_num,
+        'total': total,
+        'progreso': progreso,
+        'opciones': pregunta_actual.get_opciones_dict(),
+        'respuesta_previa': respuesta_previa.valor_respuesta if respuesta_previa else None,
+        'puede_volver': pregunta_num > 1,
+        'pregunta_anterior': pregunta_num - 1,
+    })
 
 
-def resultado(request, pk):
-    evaluacion = EvaluacionVocacional.objects.get(id=pk)
+def resultado(request, evaluacion_id):
+    """Muestra los resultados finales de la evaluación"""
+    evaluacion = get_object_or_404(EvaluacionVocacional, id=evaluacion_id)
+
     if evaluacion.estado != 'completada':
-        return render(request, 'resultado.html', {'error': 'evaluacion_no_completada', 'progreso': calculate_progress(evaluacion)})
+        total = Pregunta.objects.filter(activa=True).count()
+        respondidas = evaluacion.respuestas.count()
+        siguiente = respondidas + 1
+        return redirect('responder_pregunta',
+                        evaluacion_id=evaluacion_id,
+                        pregunta_num=siguiente)
 
-    results = get_results(evaluacion)
-    return render(request, 'resultado.html', results)
+    resultados = evaluacion.calcular_resultados()
+
+    # El primero es el de mayor porcentaje (ya vienen ordenados)
+    categoria_principal = resultados[0] if resultados else None
+
+    return render(request, 'vocacional/resultado.html', {
+        'evaluacion': evaluacion,
+        'resultados': resultados,
+        'categoria_principal': categoria_principal,
+    })
+
+
+# ─── HELPER ───────────────────────────────────────────────────────────────────
+
+def _get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
