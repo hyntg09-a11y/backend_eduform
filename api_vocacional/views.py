@@ -129,4 +129,34 @@ def _get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         return x_forwarded_for.split(',')[0]
-    return request.META.get('REMOTE_ADDR')
+    return request.META.get('REMOTE_ADDR')                                                                     
+# ─── AUTENTICACIÓN ────────────────────────────────────────────────────────────
+
+def registro(request):
+    from django.contrib.auth.models import User
+    from django.contrib.auth import login
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if User.objects.filter(username=username).exists():
+            error = 'El usuario ya existe'
+        elif username and password:
+            user = User.objects.create_user(username=username, password=password)
+            login(request, user)
+            return redirect('inicio')
+    return render(request, 'vocacional/registro.html', {'error': error})
+
+
+def login_view(request):
+    from django.contrib.auth import authenticate, login
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect('inicio')
+        error = 'Usuario o contraseña incorrectos'
+    return render(request, 'vocacional/login.html', {'error': error})
