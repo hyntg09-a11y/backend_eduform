@@ -161,3 +161,17 @@ def login_view(request):
             return redirect('inicio')
         error = 'Usuario o contraseña incorrectos'
     return render(request, 'vocacional/login.html', {'error': error})
+
+# ─── DASHBOARD ────────────────────────────────────────────────────────────────
+
+def dashboard(request):
+    from django.db.models import Count
+    total_evaluaciones = EvaluacionVocacional.objects.count()
+    datos = RespuestaEvaluacion.objects.values('pregunta__categoria__nombre').annotate(total=Count('id'))
+    labels = [d['pregunta__categoria__nombre'] for d in datos]
+    values = [d['total'] for d in datos]
+    return render(request, 'vocacional/dashboard.html', {
+        'labels': labels,
+        'values': values,
+        'total_evaluaciones': total_evaluaciones,
+    })
