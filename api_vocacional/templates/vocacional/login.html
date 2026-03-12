@@ -1,13 +1,15 @@
-<head><title>Registro</title></head>
+<!DOCTYPE html>
+<html>
+<head><title>Login</title></head>
 <body>
-    <h1>Registro</h1>
+    <h1>Iniciar sesión</h1>
     <form method="post">
         {% csrf_token %}
         <label>Usuario: <input type="text" name="username"></label><br><br>
         <label>Contraseña: <input type="password" name="password"></label><br><br>
         {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
-        <button type="submit">Registrarse</button>
+        <button type="submit">Iniciar sesión</button>
     </form>
-    <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
+    <p>¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate</a></p>
 </body>
 </html>

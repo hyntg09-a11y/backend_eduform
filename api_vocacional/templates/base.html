@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}EduForm Vocacional{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar-custom {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+    </style>
+    {% block estilos %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom mb-4">
+        <div class="container">
+            <a class="navbar-brand text-white fw-bold" href="{% url 'inicio' %}">🎓 EduForm Vocacional</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <footer class="text-center text-muted mt-5 py-3 border-top">
+        <p>EduForm Vocacional &copy; 2026</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

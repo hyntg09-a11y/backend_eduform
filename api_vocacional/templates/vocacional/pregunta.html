@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pregunta {{ pregunta_num }} de {{ total }}{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+
+        <!-- Progreso -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between text-muted small mb-1">
+                <span>Pregunta {{ pregunta_num }} de {{ total }}</span>
+                <span>{{ progreso }}% completado</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-primary" style="width: {{ progreso }}%"></div>
+            </div>
+        </div>
+
+        <!-- Categoría -->
+        <span class="badge mb-3" style="background-color: {{ pregunta.categoria.color_hex }};">
+            {{ pregunta.categoria.nombre }}
+        </span>
+
+        <!-- Pregunta -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h4 class="card-title mb-4">{{ pregunta.texto }}</h4>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    {% if pregunta.tipo_respuesta == 'boolean' %}
+                        <!-- Opciones Sí / No -->
+                        <div class="d-grid gap-3">
+                            {% for valor, etiqueta in opciones.items %}
+                            <div>
+                                <input type="radio" class="btn-check" name="respuesta"
+                                       id="op_{{ valor }}" value="{{ valor }}"
+                                       {% if respuesta_previa == valor %}checked{% endif %} required>
+                                <label class="btn btn-outline-primary w-100 py-3 fs-5" for="op_{{ valor }}">
+                                    {% if valor == 'si' %}✅{% else %}❌{% endif %} {{ etiqueta }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    {% elif pregunta.tipo_respuesta == 'escala' %}
+                        <!-- Escala 1-5 -->
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            {% for valor, etiqueta in opciones.items %}
+                            <div class="text-center">
+                                <input type="radio" class="btn-check" name="respuesta"
+                                       id="op_{{ valor }}" value="{{ valor }}"
+                                       {% if respuesta_previa == valor %}checked{% endif %} required>
+                                <label class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
+                                       style="width:60px;height:60px;font-size:1.2rem;" for="op_{{ valor }}">
+                                    {{ valor }}
+                                </label>
+                                <small class="d-block text-muted mt-1">{{ etiqueta }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    {% else %}
+                        <!-- Opción múltiple -->
+                        <div class="d-grid gap-2">
+                            {% for valor, etiqueta in opciones.items %}
+                            <div>
+                                <input type="radio" class="btn-check" name="respuesta"
+                                       id="op_{{ valor }}" value="{{ valor }}"
+                                       {% if respuesta_previa == valor %}checked{% endif %} required>
+                                <label class="btn btn-outline-secondary w-100 text-start px-4 py-2" for="op_{{ valor }}">
+                                    {{ etiqueta }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Navegación -->
+                    <div class="d-flex justify-content-between mt-4">
+                        {% if puede_volver %}
+                        <a href="{% url 'responder_pregunta' evaluacion.id pregunta_anterior %}"
+                           class="btn btn-outline-secondary">
+                            ← Anterior
+                        </a>
+                        {% else %}
+                        <div></div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary px-4">
+                            {% if pregunta_num == total %}
+                                Ver Resultado 🎯
+                            {% else %}
+                                Siguiente →
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

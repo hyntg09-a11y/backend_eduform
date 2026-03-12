@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block titulo %}Inicio - EduForm Vocacional{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center text-center mt-5">
+    <div class="col-md-8">
+        <h1 class="display-5 fw-bold mb-3">🎓 Test de Orientación Vocacional</h1>
+        <p class="lead text-muted mb-4">
+            Responde {{ total_preguntas }} preguntas y descubre qué área vocacional se adapta mejor a tu perfil.
+            El test cubre {{ total_categorias }} categorías diferentes.
+        </p>
+
+        <div class="row g-3 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <h3 class="fw-bold text-primary">{{ total_preguntas }}</h3>
+                    <p class="text-muted mb-0">Preguntas</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <h3 class="fw-bold text-success">{{ total_categorias }}</h3>
+                    <p class="text-muted mb-0">Categorías</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-3">
+                    <h3 class="fw-bold text-warning">~5 min</h3>
+                    <p class="text-muted mb-0">Duración</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'crear_evaluacion' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg px-5">
+                Comenzar Test →
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
