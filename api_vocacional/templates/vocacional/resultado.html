@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block titulo %}Resultado - EduForm Vocacional{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-md-9">
+
+        <div class="text-center mb-5">
+            <h1 class="display-6 fw-bold">🎯 Tu Perfil Vocacional</h1>
+            <p class="text-muted">Evaluación #{{ evaluacion.id }} — Completada el {{ evaluacion.completado_en|date:"d/m/Y H:i" }}</p>
+        </div>
+
+        {% if categoria_principal %}
+        <!-- Categoría Principal -->
+        <div class="card border-0 shadow mb-4 text-white"
+             style="background-color: {{ categoria_principal.color }};">
+            <div class="card-body p-4 text-center">
+                <h2 class="fw-bold">🏆 {{ categoria_principal.nombre }}</h2>
+                <p class="fs-4 mb-0">{{ categoria_principal.porcentaje }}% de afinidad</p>
+                <small class="opacity-75">Tu área vocacional principal</small>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Todas las categorías -->
+        <h5 class="fw-bold mb-3">Resultados por categoría</h5>
+        {% for r in resultados %}
+        <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="fw-semibold">{{ r.nombre }}</span>
+                <span class="text-muted">{{ r.porcentaje }}%</span>
+            </div>
+            <div class="progress" style="height: 22px; border-radius: 8px;">
+                <div class="progress-bar" role="progressbar"
+                     style="width: {{ r.porcentaje }}%; background-color: {{ r.color }}; border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No hay resultados disponibles.</p>
+        {% endfor %}
+
+        <!-- Acciones -->
+        <div class="d-flex gap-3 mt-5 justify-content-center">
+            <form method="POST" action="{% url 'crear_evaluacion' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary">
+                    🔄 Hacer otro test
+                </button>
+            </form>
+            <a href="{% url 'inicio' %}" class="btn btn-secondary">
+                🏠 Inicio
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
