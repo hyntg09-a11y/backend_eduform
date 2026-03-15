@@ -8,6 +8,10 @@ from .models import Pregunta, EvaluacionVocacional, RespuestaEvaluacion, Categor
 
 # ─── INICIO ───────────────────────────────────────────────────────────────────
 
+def landing(request):
+    return render(request, 'vocacional/landing.html', {})
+
+
 @login_required
 def inicio(request):
     """Página de bienvenida con estadísticas"""
@@ -88,10 +92,7 @@ def responder_pregunta(request, evaluacion_id, pregunta_num):
         'pregunta_num': pregunta_num,
         'total': total,
         'progreso': progreso,
-        'opciones': pregunta_actual.get_opciones_dict(),
-        'respuesta_previa': respuesta_previa['valor_respuesta'] if respuesta_previa else None,
-        'puede_volver': pregunta_num > 1,
-        'pregunta_anterior': pregunta_num - 1,
+        'respuesta_previa': respuesta_previa,
     })
 
 
