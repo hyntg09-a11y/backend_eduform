@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDUFORM — Orientación Vocacional</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;font-family:Arial,sans-serif;background:#0a1628;display:flex;flex-direction:column}
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#0a1628 0%,#1a3a5c 40%,#0d2137 70%,#0a1628 100%)}
+.hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.08) 1px,transparent 1px);background-size:32px 32px}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.6) 100%)}
+.circle-1{position:absolute;width:400px;height:400px;border-radius:50%;border:1px solid rgba(79,70,229,0.15);top:-100px;right:-100px}
+.circle-2{position:absolute;width:250px;height:250px;border-radius:50%;border:1px solid rgba(79,70,229,0.1);bottom:-60px;left:-60px}
+.hero-content{position:relative;z-index:1;text-align:center;padding:3rem 2rem;max-width:680px;margin:0 auto}
+.badge{display:inline-block;background:rgba(79,70,229,0.25);border:1px solid rgba(79,70,229,0.4);color:#a5b4fc;font-size:12px;font-weight:600;padding:6px 16px;border-radius:20px;margin-bottom:1.5rem;letter-spacing:0.05em}
+.hero-title{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;color:white;line-height:1.2;margin-bottom:1rem}
+.hero-title span{background:linear-gradient(135deg,#818cf8,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:16px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:2.5rem;max-width:480px;margin-left:auto;margin-right:auto}
+.stats{display:flex;gap:2rem;justify-content:center;margin-bottom:2.5rem}
+.stat{text-align:center}
+.stat-num{font-size:24px;font-weight:700;color:white}
+.stat-label{font-size:12px;color:rgba(255,255,255,0.5)}
+.divider{width:1px;background:rgba(255,255,255,0.15)}
+.btn-main{display:inline-block;background:#4f46e5;color:white;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:600;letter-spacing:0.02em;box-shadow:0 8px 24px rgba(79,70,229,0.4)}
+.btn-main:hover{background:#4338ca}
+.login-link{margin-top:1rem;font-size:13px;color:rgba(255,255,255,0.35)}
+.login-link a{color:#818cf8;text-decoration:none}
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-dots"></div>
+  <div class="hero-overlay"></div>
+  <div class="circle-1"></div>
+  <div class="circle-2"></div>
+  <div class="hero-content">
+    <div class="badge">ORIENTACIÓN VOCACIONAL</div>
+    <h1 class="hero-title">Descubre tu <span>vocación</span> profesional</h1>
+    <p class="hero-sub">Responde 50 preguntas y obtén un análisis detallado de las áreas profesionales que mejor se adaptan a tu perfil.</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">50</div><div class="stat-label">Preguntas</div></div>
+      <div class="divider"></div>
+      <div class="stat"><div class="stat-num">6</div><div class="stat-label">Categorías</div></div>
+      <div class="divider"></div>
+      <div class="stat"><div class="stat-num">~5min</div><div class="stat-label">Duración</div></div>
+    </div>
+    <a href="{% url 'login' %}" class="btn-main">Comenzar ahora →</a>
+    <div class="login-link">¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></div>
+  </div>
+</section>
+</body>
+</html>
