@@ -33,3 +33,5 @@ Thumbs.db
 
 # Aider
 .aider*
+ai_tester.py
+qa_test.py
