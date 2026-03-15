@@ -1,13 +1,72 @@
-<head><title>Registro</title></head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDUFORM — Registro</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0d1b2a;font-family:Arial}
+.wrapper{display:flex;width:780px;min-height:500px;border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.4)}
+.panel-left{flex:1;background:linear-gradient(145deg,#0d1b2a,#1a2f4a,#0f2544);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;position:relative;overflow:hidden}
+.panel-left::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;border:1px solid rgba(79,70,229,0.15);top:-80px;left:-80px}
+.panel-left::after{content:'';position:absolute;width:200px;height:200px;border-radius:50%;border:1px solid rgba(79,70,229,0.2);bottom:-40px;right:-40px}
+.logo-box{width:64px;height:64px;background:#4f46e5;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem}
+.brand{font-size:28px;font-weight:700;color:white;letter-spacing:0.08em;margin-bottom:0.75rem}
+.brand-sub{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.6;max-width:220px;text-align:center}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:2rem}
+.dot{width:8px;height:8px;border-radius:50%}
+.panel-right{width:380px;background:white;display:flex;flex-direction:column;justify-content:center;padding:3rem}
+.form-title{font-size:22px;font-weight:700;color:#111;margin-bottom:0.25rem}
+.form-sub{font-size:14px;color:#6c757d;margin-bottom:2rem}
+.field-label{font-size:11px;font-weight:600;color:#6c757d;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em}
+.input-wrap{position:relative;margin-bottom:1.25rem}
+.input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%)}
+.input-wrap input{width:100%;padding:11px 12px 11px 38px;font-size:14px;border:1px solid #dee2e6;border-radius:8px;background:#f8f9fa;color:#111;outline:none}
+.input-wrap input:focus{border-color:#4f46e5;background:white}
+.btn-registro{width:100%;padding:12px;background:#4f46e5;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.02em;margin-bottom:1.25rem}
+.btn-registro:hover{background:#4338ca}
+.divider{border-top:1px solid #f0f0f0;padding-top:1rem;text-align:center}
+.divider span{font-size:13px;color:#6c757d}
+.divider a{font-size:13px;color:#4f46e5;text-decoration:none;font-weight:600}
+.alert-error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:1rem}
+</style>
+</head>
 <body>
-    <h1>Registro</h1>
+<div class="wrapper">
+  <div class="panel-left">
+    <div style="position:relative;z-index:1;text-align:center">
+      <div class="logo-box"><svg width="32" height="32" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 5.5V10.5L8 14L2 10.5V5.5L8 2Z" fill="white"/></svg></div>
+      <div class="brand">EDUFORM</div>
+      <div class="brand-sub">Crea tu cuenta y descubre tu perfil vocacional</div>
+      <div class="dots">
+        <div class="dot" style="background:rgba(255,255,255,0.2)"></div>
+        <div class="dot" style="background:#4f46e5"></div>
+        <div class="dot" style="background:rgba(255,255,255,0.2)"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-right">
+    <div class="form-title">Crear cuenta</div>
+    <div class="form-sub">Regístrate para comenzar el test vocacional</div>
+    {% if error %}<div class="alert-error">{{ error }}</div>{% endif %}
     <form method="post">
-        {% csrf_token %}
-        <label>Usuario: <input type="text" name="username"></label><br><br>
-        <label>Contraseña: <input type="password" name="password"></label><br><br>
-        {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
-        <button type="submit">Registrarse</button>
+      {% csrf_token %}
+      <label class="field-label">Usuario</label>
+      <div class="input-wrap">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#9ca3af" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" name="username" placeholder="tu_usuario" required>
+      </div>
+      <label class="field-label">Contraseña</label>
+      <div class="input-wrap" style="margin-bottom:1.75rem">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="2" stroke="#9ca3af" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-registro">Crear cuenta</button>
     </form>
-    <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
+    <div class="divider"><span>¿Ya tienes cuenta? </span><a href="{% url 'login' %}">Inicia sesión</a></div>
+  </div>
+</div>
 </body>
 </html>
