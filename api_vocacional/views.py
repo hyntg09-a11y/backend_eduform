@@ -2,11 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count  # Añadida esta línea
+from django.contrib.auth.decorators import login_required
 from .models import Pregunta, EvaluacionVocacional, RespuestaEvaluacion, CategoriaVocacional, Carrera, RecomendacionCarrera
 
 
 # ─── INICIO ───────────────────────────────────────────────────────────────────
 
+@login_required
 def inicio(request):
     """Página de bienvenida con estadísticas"""
     total_preguntas = Pregunta.objects.filter(activa=True).count()
@@ -19,6 +21,7 @@ def inicio(request):
 
 # ─── EVALUACIÓN ───────────────────────────────────────────────────────────────
 
+@login_required
 def crear_evaluacion(request):
     """Crea una nueva evaluación y redirige a la primera pregunta"""
     if request.method == 'POST':
@@ -34,6 +37,7 @@ def crear_evaluacion(request):
     return redirect('inicio')
 
 
+@login_required
 def responder_pregunta(request, evaluacion_id, pregunta_num):
     """Muestra y procesa una pregunta a la vez"""
     evaluacion = get_object_or_404(EvaluacionVocacional, id=evaluacion_id)
@@ -91,6 +95,7 @@ def responder_pregunta(request, evaluacion_id, pregunta_num):
     })
 
 
+@login_required
 def resultado(request, evaluacion_id):
     """Muestra los resultados finales de la evaluación"""
     evaluacion = get_object_or_404(EvaluacionVocacional, id=evaluacion_id)
@@ -164,6 +169,7 @@ def login_view(request):
 
 # ─── DASHBOARD ────────────────────────────────────────────────────────────────
 
+@login_required
 def dashboard(request):
     from django.db.models import Count
     total_evaluaciones = EvaluacionVocacional.objects.count()
