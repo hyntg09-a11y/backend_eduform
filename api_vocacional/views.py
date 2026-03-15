@@ -89,7 +89,7 @@ def responder_pregunta(request, evaluacion_id, pregunta_num):
         'total': total,
         'progreso': progreso,
         'opciones': pregunta_actual.get_opciones_dict(),
-        'respuesta_previa': respuesta_previa.valor_respuesta if respuesta_previa else None,
+        'respuesta_previa': respuesta_previa['valor_respuesta'] if respuesta_previa else None,
         'puede_volver': pregunta_num > 1,
         'pregunta_anterior': pregunta_num - 1,
     })
@@ -181,3 +181,10 @@ def dashboard(request):
         'values': values,
         'total_evaluaciones': total_evaluaciones,
     })
+
+# ─── AUTENTICACIÓN ────────────────────────────────────────────────────────────
+
+def logout_view(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect('login')
