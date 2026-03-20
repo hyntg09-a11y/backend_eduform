@@ -45,61 +45,6 @@ def crear_evaluacion(request):
 def responder_pregunta(request, evaluacion_id, pregunta_num):
     """Muestra y procesa una pregunta a la vez"""
     evaluacion = get_object_or_404(EvaluacionVocacional, id=evaluacion_id)
-    preguntas = list(Pregunta.objects.filter(activa=True).select_related('categoria').order_by('orden', 'id'))
-    total = len(preguntas)
-
-    # Validar número de pregunta
-    if pregunta_num < 1 or pregunta_num > total:
-        return redirect('resultado', evaluacion_id=evaluacion_id)
-
-    pregunta_actual = preguntas[pregunta_num - 1]
-    progreso = round((evaluacion.respuestas.count() / total) * 100) if total > 0 else 0
-
-    if request.method == 'POST':
-        valor = request.POST.get('respuesta')
-        if valor:
-            with transaction.atomic():
-                # Permite re-responder (elimina si ya existe)
-                RespuestaEvaluacion.objects.filter(
-                    evaluacion=evaluacion,
-                    pregunta=pregunta_actual
-                ).delete()
-                RespuestaEvaluacion.objects.create(
-                    evaluacion=evaluacion,
-                    pregunta=pregunta_actual,
-                    valor_respuesta=valor,
-                )
-
-            # Si es la última pregunta → completar
-            if pregunta_num >= total:
-                evaluacion.estado = 'completada'
-                evaluacion.completado_en = timezone.now()
-                evaluacion.save(update_fields=['estado', 'completado_en'])
-                return redirect('resultado', evaluacion_id=evaluacion_id)
-
-            return redirect('responder_pregunta',
-                            evaluacion_id=evaluacion_id,
-                            pregunta_num=pregunta_num + 1)
-
-    # Respuesta previa si existe (para mostrar seleccionada)
-    respuesta_previa = RespuestaEvaluacion.objects.filter(
-        evaluacion=evaluacion, pregunta=pregunta_actual
-    ).first()
-
-    return render(request, 'vocacional/pregunta.html', {
-        'evaluacion': evaluacion,
-        'pregunta': pregunta_actual,
-        'pregunta_num': pregunta_num,
-        'total': total,
-        'progreso': progreso,
-        'respuesta_previa': respuesta_previa,
-    })
-
-
-@login_required
-def resultado(request, evaluacion_id):
-    """Muestra los resultados finales de la evaluación"""
-    evaluacion = get_object_or_404(EvaluacionVocacional, id=evaluacion_id)
 
     if evaluacion.estado != 'completada':
         total = Pregunta.objects.filter(activa=True).count()
@@ -226,3 +171,15 @@ def admin_eliminar_usuario(request, user_id):
     if request.method == 'POST':
         User.objects.filter(id=user_id).delete()
     return redirect('admin_panel')
+
+
+def admin_editar_usuario(request, user_id):
+    from django.contrib.auth.models import User
+    u = get_object_or_404(User, id=user_id)
+    error = None
+    if request.method == 'POST':
+        u.first_name = request.POST.get('nombre', '')
+        u.last_name = request.POST.get('apellido', '')
+        u.save()
+        return redirect('admin_panel')
+    return render(request, 'vocacional/admin_editar.html', {'u': u})
