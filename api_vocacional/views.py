@@ -148,14 +148,23 @@ def login_view(request):
 @login_required
 def dashboard(request):
     from django.db.models import Count
+    from django.contrib.auth.models import User
     total_evaluaciones = EvaluacionVocacional.objects.count()
+    total_usuarios = User.objects.count()
+    total_completadas = EvaluacionVocacional.objects.filter(estado='completada').count()
     datos = RespuestaEvaluacion.objects.values('pregunta__categoria__nombre').annotate(total=Count('id'))
     labels = [d['pregunta__categoria__nombre'] for d in datos]
     values = [d['total'] for d in datos]
+    categoria_top = labels[0] if labels else '—'
+    ultimas = EvaluacionVocacional.objects.filter(estado='completada').select_related('usuario').order_by('-completado_en')[:5]
     return render(request, 'vocacional/dashboard.html', {
         'labels': labels,
         'values': values,
         'total_evaluaciones': total_evaluaciones,
+        'total_usuarios': total_usuarios,
+        'total_completadas': total_completadas,
+        'categoria_top': categoria_top,
+        'ultimas': ultimas,
     })
 
 # ─── AUTENTICACIÓN ────────────────────────────────────────────────────────────

@@ -7,227 +7,59 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', 'Arial', sans-serif;
-            min-height: 100vh;
-            background:
-                radial-gradient(ellipse at 20% 20%, rgba(25, 25, 112, 0.4) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(139, 0, 0, 0.3) 0%, transparent 50%),
-                linear-gradient(135deg, rgb(10, 10, 30) 0%, rgb(20, 20, 50) 100%);
-            color: #ffffff;
-        }
-
-        @keyframes fadeRise {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* NAVBAR */
-        .navbar {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 16px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .navbar-brand {
-            font-size: 1.4rem;
-            font-weight: 800;
-            background: linear-gradient(90deg, #ffffff, #a0b4ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-decoration: none;
-        }
-
-        .navbar-link {
-            color: rgba(255,255,255,0.75);
-            text-decoration: none;
-            font-size: 0.95rem;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.25s ease;
-        }
-
-        .navbar-link:hover {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            transform: translateY(-1px);
-        }
-
-        /* MAIN */
-        .main {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 50px 24px;
-            animation: fadeRise 0.6s ease both;
-        }
-
-        /* HEADER */
-        .page-header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .page-header h1 {
-            font-size: clamp(1.8rem, 4vw, 2.8rem);
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #a0b4ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-
-        .page-header p {
-            color: rgba(255,255,255,0.5);
-            font-size: 1rem;
-        }
-
-        /* STATS GRID */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            border-radius: 16px;
-            padding: 28px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-        }
-
-        .stat-card.blue {
-            background: linear-gradient(135deg, rgba(25, 25, 112, 0.9), rgba(45, 45, 160, 0.8));
-        }
-
-        .stat-card.green {
-            background: linear-gradient(135deg, rgba(0, 100, 0, 0.9), rgba(0, 150, 50, 0.8));
-        }
-
-        .stat-card.red {
-            background: linear-gradient(135deg, rgba(139, 0, 0, 0.9), rgba(180, 20, 20, 0.8));
-        }
-
-        .stat-card.purple {
-            background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(100, 20, 160, 0.8));
-        }
-
-        .stat-card h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.7);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .stat-card .number {
-            font-size: 3rem;
-            font-weight: 800;
-            color: #ffffff;
-            line-height: 1;
-        }
-
-        .stat-card .label {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.5);
-            margin-top: 6px;
-        }
-
-        /* CHART CARD */
-        .chart-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 18px;
-            padding: 36px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-            margin-bottom: 32px;
-        }
-
-        .chart-card h2 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 28px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .chart-wrapper {
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        /* BTN */
-        .btn-volver {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 28px;
-            background: linear-gradient(135deg, rgb(25, 25, 112), rgb(45, 45, 160));
-            color: white;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 4px 15px rgba(25, 25, 112, 0.4);
-            transition: all 0.25s ease;
-        }
-
-        .btn-volver:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(25, 25, 112, 0.6);
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .navbar { padding: 14px 20px; }
-            .main { padding: 30px 16px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-        }
+        body { font-family: 'Inter', Arial, sans-serif; min-height: 100vh; background: radial-gradient(ellipse at 20% 20%, rgba(25,25,112,0.4) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(139,0,0,0.3) 0%, transparent 50%), linear-gradient(135deg, rgb(10,10,30) 0%, rgb(20,20,50) 100%); color: #fff; }
+        @keyframes fadeRise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .navbar { background: rgba(255,255,255,0.07); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { font-size: 1.4rem; font-weight: 800; background: linear-gradient(90deg,#fff,#a0b4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+        .navbar-right { display: flex; gap: 8px; align-items: center; }
+        .navbar-link { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 0.95rem; padding: 8px 16px; border-radius: 8px; transition: all 0.25s ease; }
+        .navbar-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .main { max-width: 1100px; margin: 0 auto; padding: 50px 24px; animation: fadeRise 0.6s ease both; }
+        .page-header { text-align: center; margin-bottom: 48px; }
+        .page-header h1 { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; background: linear-gradient(135deg,#fff 0%,#a0b4ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .page-header p { color: rgba(255,255,255,0.5); font-size: 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-card { border-radius: 16px; padding: 28px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+        .stat-card.blue { background: linear-gradient(135deg, rgba(25,25,112,0.9), rgba(45,45,160,0.8)); }
+        .stat-card.green { background: linear-gradient(135deg, rgba(0,100,0,0.9), rgba(0,150,50,0.8)); }
+        .stat-card.purple { background: linear-gradient(135deg, rgba(75,0,130,0.9), rgba(100,20,160,0.8)); }
+        .stat-card.orange { background: linear-gradient(135deg, rgba(180,80,0,0.9), rgba(220,120,0,0.8)); }
+        .stat-card h3 { font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .stat-card .number { font-size: 3rem; font-weight: 800; color: #fff; line-height: 1; }
+        .stat-card .label { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 6px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        .chart-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 36px; box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
+        .chart-card h2 { font-size: 1.2rem; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .chart-wrapper { max-width: 380px; margin: 0 auto; }
+        .table-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 36px; box-shadow: 0 8px 40px rgba(0,0,0,0.3); margin-bottom: 32px; }
+        .table-card h2 { font-size: 1.2rem; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; }
+        td { padding: 12px 14px; font-size: 14px; color: rgba(255,255,255,0.85); border-top: 1px solid rgba(255,255,255,0.06); }
+        tr:hover td { background: rgba(255,255,255,0.03); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-completada { background: rgba(0,150,50,0.25); color: #4ade80; }
+        .footer { text-align: center; margin-top: 20px; }
+        .btn-volver { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: linear-gradient(135deg, rgb(25,25,112), rgb(45,45,160)); color: white; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.15); transition: all 0.25s ease; }
+        .btn-volver:hover { transform: translateY(-2px); }
+        @media (max-width: 768px) { .navbar { padding: 14px 20px; } .main { padding: 30px 16px; } .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-
     <nav class="navbar">
-        <a href="/" class="navbar-brand">📊 EduForm Vocacional</a>
-        <a href="/" class="navbar-link">🏠 Inicio</a>
-         <a href="{% url 'logout' %}" class="navbar-link">🚪 Cerrar sesión</a>
+        <a href="/" class="navbar-brand"> EduForm Vocacional</a>
+        <div class="navbar-right">
+            <a href="{% url 'admin_panel' %}" class="navbar-link"> Admin</a>
+            <a href="{% url 'logout' %}" class="navbar-link"> Cerrar sesión</a>
+        </div>
     </nav>
-    </nav>
-
     <main class="main">
-
         <div class="page-header">
-            <h1>📊 Dashboard Vocacional</h1>
+            <h1> Dashboard Vocacional</h1>
             <p>Estadísticas generales del sistema de orientación vocacional</p>
         </div>
-
         <div class="stats-grid">
             <div class="stat-card blue">
                 <h3>Total Evaluaciones</h3>
@@ -235,76 +67,72 @@
                 <div class="label">registradas en el sistema</div>
             </div>
             <div class="stat-card green">
-                <h3>Categorías</h3>
-                <div class="number">{{ labels|length }}</div>
-                <div class="label">áreas vocacionales activas</div>
+                <h3>Completadas</h3>
+                <div class="number">{{ total_completadas }}</div>
+                <div class="label">evaluaciones finalizadas</div>
+            </div>
+            <div class="stat-card purple">
+                <h3>Usuarios</h3>
+                <div class="number">{{ total_usuarios }}</div>
+                <div class="label">registrados en el sistema</div>
+            </div>
+            <div class="stat-card orange">
+                <h3>Área Top</h3>
+                <div class="number" style="font-size:1.4rem;padding-top:6px">{{ categoria_top }}</div>
+                <div class="label">categoría más respondida</div>
             </div>
         </div>
-
-        <div class="chart-card">
-            <h2>🎯 Distribución por Área Vocacional</h2>
-            <div class="chart-wrapper">
-                <canvas id="miGrafica"></canvas>
+        <div class="grid-2">
+            <div class="chart-card">
+                <h2> Distribución por Área Vocacional</h2>
+                <div class="chart-wrapper">
+                    <canvas id="miGrafica"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h2> Respuestas por Categoría</h2>
+                <div class="chart-wrapper">
+                    <canvas id="barChart"></canvas>
+                </div>
             </div>
         </div>
-
+        <div class="table-card">
+            <h2> Últimas Evaluaciones Completadas</h2>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Usuario</th><th>Completada</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                    {% for e in ultimas %}
+                    <tr>
+                        <td>#{{ e.id }}</td>
+                        <td>{{ e.usuario.username|default:"" }}</td>
+                        <td>{{ e.completado_en|date:"d/m/Y H:i" }}</td>
+                        <td><span class="badge badge-completada">Completada</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3);padding:32px">No hay evaluaciones completadas aún</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <div class="footer">
-            <a href="/" class="btn-volver">🏠 Volver al inicio</a>
+            <a href="{% url 'inicio' %}" class="btn-volver"> Volver al inicio</a>
         </div>
-
     </main>
-
     <script>
-        const ctx = document.getElementById('miGrafica').getContext('2d');
-
-        new Chart(ctx, {
+        const labels = {{ labels|safe }};
+        const values = {{ values|safe }};
+        const colors = ['rgba(25,25,112,0.85)','rgba(139,0,0,0.85)','rgba(0,100,0,0.85)','rgba(255,140,0,0.85)','rgba(75,0,130,0.85)','rgba(0,139,139,0.85)'];
+        new Chart(document.getElementById('miGrafica').getContext('2d'), {
             type: 'pie',
-            data: {
-                labels: {{ labels|safe }},
-                datasets: [{
-                    label: 'Respuestas por categoría',
-                    data: {{ values|safe }},
-                    backgroundColor: [
-                        'rgba(25, 25, 112, 0.85)',
-                        'rgba(139, 0, 0, 0.85)',
-                        'rgba(0, 100, 0, 0.85)',
-                        'rgba(255, 140, 0, 0.85)',
-                        'rgba(75, 0, 130, 0.85)',
-                        'rgba(0, 139, 139, 0.85)'
-                    ],
-                    borderColor: 'rgba(255,255,255,0.3)',
-                    borderWidth: 2,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: 'rgba(255,255,255,0.8)',
-                            font: { size: 13, weight: '600' },
-                            padding: 16,
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(10,10,30,0.9)',
-                        titleColor: '#ffffff',
-                        bodyColor: 'rgba(255,255,255,0.8)',
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        borderWidth: 1,
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = Math.round(context.parsed * 100 / total);
-                                return ' ' + context.label + ': ' + pct + '%';
-                            }
-                        }
-                    }
-                }
-            }
+            data: { labels: labels, datasets: [{ data: values, backgroundColor: colors, borderColor: 'rgba(255,255,255,0.3)', borderWidth: 2, hoverOffset: 10 }] },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.8)', font: { size: 12, weight: '600' }, padding: 12, usePointStyle: true } }, tooltip: { backgroundColor: 'rgba(10,10,30,0.9)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.8)', callbacks: { label: function(c) { const t = c.dataset.data.reduce((a,b)=>a+b,0); return ' '+c.label+': '+Math.round(c.parsed*100/t)+'%'; } } } } }
+        });
+        new Chart(document.getElementById('barChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: 'Respuestas', data: values, backgroundColor: colors, borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1, borderRadius: 6 }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true } } }
         });
     </script>
 </body>
