@@ -74,7 +74,37 @@ def responder_pregunta(request, evaluacion_id, pregunta_num):
         'categoria_principal': categoria_principal,
     })
 
+@login_required
+def resultado(request, evaluacion_id):
+    """Muestra los resultados finales de la evaluación"""
+    evaluacion = get_object_or_404(EvaluacionVocacional, id=evaluacion_id)
 
+    if evaluacion.estado != 'completada':
+        total = Pregunta.objects.filter(activa=True).count()
+        respondidas = evaluacion.respuestas.count()
+        siguiente = respondidas + 1
+        return redirect('responder_pregunta',
+                        evaluacion_id=evaluacion_id,
+                        pregunta_num=siguiente)
+
+    resultados = evaluacion.calcular_resultados()
+
+    for r in resultados:
+        carrera = Carrera.objects.filter(perfil_vocacional_id=r['categoria_id'], activa=True).first()
+        if carrera:
+            RecomendacionCarrera.objects.get_or_create(
+                evaluacion=evaluacion,
+                carrera=carrera,
+                defaults={'puntaje': r['porcentaje']}
+            )
+
+    categoria_principal = resultados[0] if resultados else None
+
+    return render(request, 'vocacional/resultado.html', {
+        'evaluacion': evaluacion,
+        'resultados': resultados,
+        'categoria_principal': categoria_principal,
+    })
 # ─── HELPER ───────────────────────────────────────────────────────────────────
 
 def _get_client_ip(request):
@@ -134,6 +164,7 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
     return redirect('login')
+
 
 # ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
 
