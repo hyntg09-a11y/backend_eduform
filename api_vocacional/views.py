@@ -189,3 +189,40 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
     return redirect('login')
+
+# ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
+
+@login_required
+def admin_panel(request):
+    from django.contrib.auth.models import User
+    usuarios = User.objects.prefetch_related(
+        'evaluaciones__recomendaciones_carrera__carrera',
+        'evaluaciones__recomendaciones_programa__programa',
+    ).all()
+    data = []
+    for u in usuarios:
+        eval_completada = u.evaluaciones.filter(estado='completada').first()
+        carrera = None
+        programa = None
+        if eval_completada:
+            rec_carrera = eval_completada.recomendaciones_carrera.first()
+            rec_programa = eval_completada.recomendaciones_programa.first()
+            carrera = rec_carrera.carrera.nombre if rec_carrera else None
+            programa = rec_programa.programa.nombre_programa if rec_programa else None
+        data.append({
+            'id': u.id,
+            'username': u.username,
+            'nombre': u.first_name or '—',
+            'apellido': u.last_name or '—',
+            'carrera': carrera or '—',
+            'programa': programa or '—',
+            'fecha': u.date_joined.strftime('%d/%m/%Y'),
+        })
+    return render(request, 'vocacional/admin_panel.html', {'usuarios': data})
+
+
+def admin_eliminar_usuario(request, user_id):
+    from django.contrib.auth.models import User
+    if request.method == 'POST':
+        User.objects.filter(id=user_id).delete()
+    return redirect('admin_panel')
