@@ -75,23 +75,6 @@ class Carrera(models.Model):
         return self.nombre
 
 
-class EvaluacionVocacional(models.Model):
-    """Evaluación vocacional"""
-    carrera = models.ForeignKey(
-        Carrera,
-        on_delete=models.CASCADE,
-        related_name='evaluaciones'
-    )
-    puntaje = models.FloatField(default=0.0)
-    creado_en = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-creado_en']
-
-    def __str__(self):
-        return f"Evaluación #{self.id} - {self.carrera}"
-
-
 class RecomendacionCarrera(models.Model):
     """Recomendación de carrera generada por una evaluación"""
     evaluacion = models.ForeignKey(
