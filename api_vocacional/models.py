@@ -3,6 +3,32 @@ from django.db import models
 from django.utils import timezone
 
 
+class CategoriaVocacional(models.Model):
+    """Categoría de orientación vocacional (ej: Tecnología, Salud, Arte)"""
+    nombre = models.CharField(max_length=100, unique=True)
+    descripcion = models.TextField(blank=True)
+    color_hex = models.CharField(max_length=7, default='#3498db', help_text="Color para visualización")
+    orden = models.PositiveSmallIntegerField(default=0)
+    activa = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['orden', 'nombre']
+        verbose_name_plural = "Categorías Vocacionales"
+
+    def __str__(self):
+        return self.nombre
+
+    def to_dict(self):
+        """Método útil para respuestas rápidas sin serializer"""
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'descripcion': self.descripcion,
+            'color': self.color_hex,
+        }
+
+
 class Pregunta(models.Model):
     """Pregunta de la evaluación vocacional"""
     TIPO_RESPUESTA = [
@@ -35,10 +61,118 @@ class Pregunta(models.Model):
         """Devuelve opciones en formato amigable para el frontend"""
         if not self.opciones:
             return {'si': 'Me interesa', 'no': 'No me interesa'} if self.tipo_respuesta == 'boolean' else {}
-        elif self.tipo_respuesta == 'escala':
-            return {str(i): str(i) for i in range(1, 6)}
-        else:
-            return {option: option for option in self.opciones}
+        return self.opciones if isinstance(self.opciones, dict) else {str(i): val for i, val in enumerate(self.opciones)}
+
+
+class ProgramaEstatal(models.Model):
+    """Programa estatal de apoyo vocacional"""
+    nombre_programa = models.CharField(max_length=200)
+    entidad_responsable = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True)
+    activo = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['nombre_programa']
+        verbose_name_plural = "Programas Estatales"
+
+    def __str__(self):
+        return self.nombre_programa
+
+
+class Carrera(models.Model):
+    """Carrera profesional recomendable"""
+    nombre = models.CharField(max_length=200, unique=True)
+    perfil_vocacional = models.ForeignKey(
+        CategoriaVocacional,
+        on_delete=models.PROTECT,
+        related_name='carreras'
+    )
+    descripcion = models.TextField(blank=True)
+    activa = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class EvaluacionVocacional(models.Model):
+    """Instancia de una evaluación realizada por un usuario"""
+    estado = models.CharField(
+        max_length=20,
+        choices=[
+            ('iniciada', 'Iniciada'),
+            ('en_progreso', 'En progreso'),
+            ('completada', 'Completada'),
+            ('cancelada', 'Cancelada'),
+        ],
+        default='iniciada'
+    )
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='evaluaciones'
+    )
+    ip_usuario = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True)
+    iniciado_en = models.DateTimeField(auto_now_add=True)
+    completado_en = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, blank=True, help_text="Datos extra: navegador, resolución, etc.")
+
+    class Meta:
+        ordering = ['-iniciado_en']
+
+    def __str__(self):
+        return f"Evaluación #{self.id} - {self.estado}"
+
+    @property
+    def progreso_porcentaje(self):
+        """Calcula dinámicamente el progreso de la evaluación"""
+        total = Pregunta.objects.filter(activa=True).count()
+        if total == 0:
+            return 100
+        respondidas = self.respuestas.count()
+        return round((respondidas / total) * 100)
+
+    def calcular_resultados(self):
+        """Lógica dinámica para calcular porcentajes por categoría"""
+        resultados = {}
+        preguntas_respondidas = self.respuestas.select_related('pregunta__categoria')
+
+        for respuesta in preguntas_respondidas:
+            cat = respuesta.pregunta.categoria
+            if cat.nombre not in resultados:
+                resultados[cat.nombre] = {
+                    'categoria_id': cat.id,
+                    'nombre': cat.nombre,
+                    'puntos': 0,
+                    'peso_total': 0,
+                    'color': cat.color_hex,
+                }
+
+            if respuesta.pregunta.tipo_respuesta == 'boolean':
+                valor = 1 if respuesta.valor_respuesta in ['si', 'true', True] else 0
+            elif respuesta.pregunta.tipo_respuesta == 'escala':
+                valor = float(respuesta.valor_respuesta) if str(respuesta.valor_respuesta).isdigit() else 0
+            else:
+                valor = 1
+
+            resultados[cat.nombre]['puntos'] += valor * respuesta.pregunta.peso_categoria
+            resultados[cat.nombre]['peso_total'] += respuesta.pregunta.peso_categoria
+
+        for cat_data in resultados.values():
+            if cat_data['peso_total'] > 0:
+                cat_data['porcentaje'] = round((cat_data['puntos'] / cat_data['peso_total']) * 100)
+            else:
+                cat_data['porcentaje'] = 0
+            del cat_data['puntos']
+            del cat_data['peso_total']
+
+        return sorted(resultados.values(), key=lambda x: x['porcentaje'], reverse=True)
 
 
 class RespuestaEvaluacion(models.Model):
@@ -61,18 +195,40 @@ class RespuestaEvaluacion(models.Model):
         return f"Respuesta a Pregunta #{self.pregunta_id} en Evaluación #{self.evaluacion_id}"
 
 
-class Carrera(models.Model):
-    """Carrera académica"""
-    nombre = models.CharField(max_length=200)
+class PerfilAcademico(models.Model):
+    """Perfil académico del usuario"""
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='perfiles_academicos'
+    )
     nivel_educativo = models.CharField(max_length=50)
     institucion = models.CharField(max_length=200, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['nombre']
+        ordering = ['-creado_en']
+        verbose_name_plural = "Perfiles Académicos"
 
     def __str__(self):
-        return self.nombre
+        return f"Perfil académico de {self.usuario} - {self.nivel_educativo}"
+
+
+class FactoresSocioeconomicos(models.Model):
+    """Factores socioeconómicos del usuario"""
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='factores_socioeconomicos'
+    )
+    id_factor = models.CharField(max_length=100)
+    influencia_economica = models.FloatField(default=0.0)
+
+    class Meta:
+        verbose_name_plural = "Factores Socioeconómicos"
+
+    def __str__(self):
+        return f"Factores de {self.usuario} - {self.id_factor}"
 
 
 class RecomendacionCarrera(models.Model):
@@ -96,3 +252,24 @@ class RecomendacionCarrera(models.Model):
 
     def __str__(self):
         return f"Recomendación: {self.carrera} para Evaluación #{self.evaluacion_id}"
+
+
+class RecomendacionPrograma(models.Model):
+    """Recomendación de programa estatal generada por una evaluación"""
+    evaluacion = models.ForeignKey(
+        EvaluacionVocacional,
+        on_delete=models.CASCADE,
+        related_name='recomendaciones_programa'
+    )
+    programa = models.ForeignKey(
+        ProgramaEstatal,
+        on_delete=models.PROTECT,
+        related_name='recomendaciones'
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['evaluacion', 'programa']
+
+    def __str__(self):
+        return f"Programa: {self.programa} para Evaluación #{self.evaluacion_id}"
