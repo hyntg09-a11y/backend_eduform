@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CategoriaVocacional, Pregunta, EvaluacionVocacional, RespuestaEvaluacion, Carrera, ProgramaEstatal, RecomendacionCarrera, RecomendacionPrograma, PerfilAcademico, FactoresSocioeconomicos
+from .models import CategoriaVocacional, Pregunta, EvaluacionVocacional, RespuestaEvaluacion, Carrera, ProgramaEstatal, RecomendacionCarrera, RecomendacionPrograma, PerfilAcademico
 
 # Register your models here.
 
