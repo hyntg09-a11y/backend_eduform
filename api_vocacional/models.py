@@ -197,21 +197,23 @@ class RespuestaEvaluacion(models.Model):
 
 class PerfilAcademico(models.Model):
     """Perfil académico del usuario"""
-    usuario = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+    evaluacion = models.ForeignKey(
+        EvaluacionVocacional,
         on_delete=models.CASCADE,
         related_name='perfiles_academicos'
     )
-    nivel_educativo = models.CharField(max_length=50)
-    institucion = models.CharField(max_length=200, blank=True)
-    creado_en = models.DateTimeField(auto_now_add=True)
+    pregunta = models.ForeignKey(
+        Pregunta,
+        on_delete=models.CASCADE,
+        related_name='perfiles_academicos'
+    )
 
     class Meta:
-        ordering = ['-creado_en']
+        ordering = ['-evaluacion__iniciado_en']
         verbose_name_plural = "Perfiles Académicos"
 
     def __str__(self):
-        return f"Perfil académico de {self.usuario} - {self.nivel_educativo}"
+        return f"Perfil académico para Evaluación #{self.evaluacion_id} - Pregunta #{self.pregunta_id}"
 
 
 class RecomendacionCarrera(models.Model):
