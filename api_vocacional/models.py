@@ -214,23 +214,6 @@ class PerfilAcademico(models.Model):
         return f"Perfil académico de {self.usuario} - {self.nivel_educativo}"
 
 
-class FactoresSocioeconomicos(models.Model):
-    """Factores socioeconómicos del usuario"""
-    usuario = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='factores_socioeconomicos'
-    )
-    id_factor = models.CharField(max_length=100)
-    influencia_economica = models.FloatField(default=0.0)
-
-    class Meta:
-        verbose_name_plural = "Factores Socioeconómicos"
-
-    def __str__(self):
-        return f"Factores de {self.usuario} - {self.id_factor}"
-
-
 class RecomendacionCarrera(models.Model):
     """Recomendación de carrera generada por una evaluación"""
     evaluacion = models.ForeignKey(
